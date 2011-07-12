@@ -9,6 +9,10 @@ setup(
     author_email='dev@praekelt.com',
     url='http://github.com/praekelt/django-export',
     packages = find_packages(),
+    install_requires = [
+        'django-object-tools',
+        'django-snippetscream>0.0.4',
+    ],
     include_package_data=True,
     classifiers = [
         "Programming Language :: Python",
