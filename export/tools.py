@@ -14,9 +14,12 @@ class Export(object_tools.ObjectTool):
     help_text = 'Export filtered objects for download.'
     form_class = forms.Export
 
-    def serialize(self, format, queryset):
+    def serialize(self, format, queryset, fields):
         serializer = serializers.get_serializer(format)()
-        return serializer.serialize(queryset)
+        if fields:
+            return serializer.serialize(queryset, fields=fields)
+        else:
+            return serializer.serialize(queryset)
 
     def gen_filename(self, format):
         app_label = self.model._meta.app_label
@@ -25,16 +28,28 @@ class Export(object_tools.ObjectTool):
             format = 'py'
         return '%s-%s-%s.%s' % (self.name, app_label, object_name, format)
 
+    def order(self, queryset, by, direction):
+        if direction == 'dsc':
+            order_str = '-%s' % by
+        else:
+            order_str = by
+        return queryset.order_by(order_str)
+
     def export_response(self, form):
         queryset = self.model.objects.all()
         for name, value in form.cleaned_data.iteritems():
-            if name == 'export_format':
-                format = value
-            else:
+            if name not in form.fieldsets[0][1]['fields']:
                 if value:
                     queryset = form.fields[name].filter(name, value, queryset)
+
+        order_by = form.cleaned_data['export_order_by']
+        order_direction = form.cleaned_data['export_order_direction']
+        queryset = self.order(queryset, order_by, order_direction)
         
-        data = self.serialize(format, queryset)
+        format = form.cleaned_data['export_format']
+        fields = form.cleaned_data['export_fields']
+
+        data = self.serialize(format, queryset, fields)
         filename = self.gen_filename(format)
         response = HttpResponse(data, mimetype=mimetypes.guess_type(filename)[0])
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
