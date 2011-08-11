@@ -6,6 +6,10 @@ django-export allows you to export model objects in a wide range of serialized f
 
 django-export utilizes `django-object-tools <http://pypi.python.org/pypi/django-object-tools>`_ to hook into Django's admin interface and take care of user permissions.
 
+.. contents:: Contents
+    :depth: 5
+
+
 Installation
 ------------
 
