@@ -25,3 +25,4 @@ Once installed you should see an **Export** object tool enabled on all admin cha
 If you don't see the tool make sure the logged in user has the appropriate export user permission assigned (or set user as superuser).
 
 Clicking the **Export** tool link takes you to an export page on which you can specify format, ordering and filtering of the objects you want to export. The export is delivered as a download in whichever format you select.
+
