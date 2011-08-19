@@ -1,5 +1,5 @@
-import unittest
 import inspect
+import unittest
         
 from django.db import models
 
@@ -7,7 +7,6 @@ from export import fields
 
 
 class FieldsTestCase(unittest.TestCase):
-
     def test_field_types(self):
 
         for key, value in models.__dict__.iteritems():
@@ -16,7 +15,5 @@ class FieldsTestCase(unittest.TestCase):
             except AttributeError:
                 bases = None
             if bases:
-                if models.fields.Field in bases:
+                if models.fields.Field in bases and value != models.fields.Field:
                     getattr(fields, key)
-
-#        raise NotImplementedError("Tisk tisk, missing tests. Bad developer!") 

@@ -101,7 +101,15 @@ class BooleanField(forms.fields.ChoiceField):
         return queryset.filter(**kwargs)
 
 
+class NullBooleanField(BooleanField):
+    pass
+
+
 class CharField(BasicTextField):
+    pass
+
+
+class CommaSeparatedIntegerField(BasicTextField):
     pass
 
 
@@ -221,6 +229,14 @@ class DateTimeField(forms.fields.DateTimeField):
         return queryset.filter(**kwargs)
 
 
+class FileField(BasicTextField):
+    pass
+
+
+class FilePathField(BasicTextField):
+    pass
+
+
 class IntegerField(forms.fields.IntegerField):
     def __init__(self, field, *args, **kwargs):
         super(IntegerField, self).__init__(
@@ -263,6 +279,54 @@ class IntegerField(forms.fields.IntegerField):
         if value[1]:
             kwargs['%s__lte' % name] = value[1]
         return queryset.filter(**kwargs)
+
+
+class FloatField(forms.fields.FloatField):
+    def __init__(self, field, *args, **kwargs):
+        super(FloatField, self).__init__(
+            required = False,
+            widget = AdminSplitInteger,
+            help_text="Only objects with a '%s' value within the provided range will be exported." % field.label.lower(),
+            *args, **kwargs
+        )
+    
+    def to_python(self, value):
+        if value in validators.EMPTY_VALUES:
+            return None
+        if isinstance(value, list):
+            if len(value) != 2:
+                raise ValidationError(self.error_messages['invalid'])
+            if value[0] in validators.EMPTY_VALUES and value[1] in validators.EMPTY_VALUES:
+                return None
+
+        min = None
+        max = None
+        if value[0] not in validators.EMPTY_VALUES:
+            try:
+                min = float(value[0])
+            except (TypeError, ValueError):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+        if value[1] not in validators.EMPTY_VALUES:
+            try:
+                max = float(value[1])
+            except (TypeError, ValueError):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+        
+        return (min, max)
+    
+    def filter(self, name, value, queryset):
+        kwargs = {}
+        # Filter min.
+        if value[0]:
+            kwargs['%s__gte' % name] = value[0]
+        # Filter max.
+        if value[1]:
+            kwargs['%s__lte' % name] = value[1]
+        return queryset.filter(**kwargs)
+
+
+class ImageField(BasicTextField):
+    pass
 
 
 class DecimalField(forms.fields.DecimalField):
@@ -314,11 +378,19 @@ class DecimalField(forms.fields.DecimalField):
         return queryset.filter(**kwargs)
 
 
+class AutoField(IntegerField):
+    pass
+
+
 class BigIntegerField(IntegerField):
     pass
 
 
 class PositiveIntegerField(IntegerField):
+    pass
+
+
+class PositiveSmallIntegerField(IntegerField):
     pass
 
 
@@ -334,6 +406,7 @@ class IPAddressField(BasicTextField):
     pass
 
 
+"""
 class ModelChoiceField(forms.models.ModelChoiceField):
     def __init__(self, field, queryset, *args, **kwargs):
         super(ModelChoiceField, self).__init__(
@@ -342,9 +415,11 @@ class ModelChoiceField(forms.models.ModelChoiceField):
             help_text="Only objects with relationships to the selected %s above will be exported. Hold down 'Control', or 'Command' on a Mac, to select more than one." % field.label.lower(),
             *args, **kwargs
         )
+
     def filter(self, name, value, queryset):
         kwargs = {name: value}
         return queryset.filter(**kwargs)
+"""
 
 
 class ModelMultipleChoiceField(forms.models.ModelMultipleChoiceField):
@@ -355,9 +430,25 @@ class ModelMultipleChoiceField(forms.models.ModelMultipleChoiceField):
             help_text="Only objects with relationships to the selected %s above will be exported. Hold down 'Control', or 'Command' on a Mac, to select more than one." % field.label.lower(),
             *args, **kwargs
         )
+
     def filter(self, name, value, queryset):
         kwargs = {'%s__in' % name: value}
         return queryset.filter(**kwargs)
+
+
+class ModelChoiceField(ModelMultipleChoiceField):
+    pass
+
+class OneToOneField(ModelMultipleChoiceField):
+    pass
+
+
+class ForeignKey(ModelMultipleChoiceField):
+    pass
+
+
+class ManyToManyField(ModelMultipleChoiceField):
+    pass
 
 
 class TextField(BasicTextField):
@@ -436,4 +527,8 @@ class SlugField(BasicTextField):
 
 
 class URLField(BasicTextField):
+    pass
+
+
+class XMLField(BasicTextField):
     pass
