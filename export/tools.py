@@ -2,11 +2,13 @@ import mimetypes
 
 from django import template
 from django.core import serializers
+from django.contrib.admin import helpers
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 import object_tools
 from export import forms
+
 
 class Export(object_tools.ObjectTool):
     name = 'export'
@@ -45,7 +47,7 @@ class Export(object_tools.ObjectTool):
         order_by = form.cleaned_data['export_order_by']
         order_direction = form.cleaned_data['export_order_direction']
         queryset = self.order(queryset, order_by, order_direction)
-        
+
         format = form.cleaned_data['export_format']
         fields = form.cleaned_data['export_fields']
 
@@ -56,17 +58,16 @@ class Export(object_tools.ObjectTool):
         return response
 
     def view(self, request, extra_context=None):
-        
+
         form = extra_context['form']
         if form.is_valid():
             return self.export_response(form)
 
-        from django.contrib.admin import helpers
         adminform = helpers.AdminForm(form, form.fieldsets, {})
 
         context = {'adminform': adminform}
         context.update(extra_context or {})
         context_instance = template.RequestContext(request)
         return render_to_response('export/export_form.html', context, context_instance=context_instance)
-    
+
 object_tools.tools.register(Export)
