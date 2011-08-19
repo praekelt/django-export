@@ -11,7 +11,7 @@ class TestRunner(test):
         runtests()
 setup(
     name='django-export',
-    version='0.0.1',
+    version='0.0.2',
     description='Django app allowing for filtered exporting of model data.',
     long_description = open('README.rst', 'r').read() + open('AUTHORS.rst', 'r').read() + open('CHANGELOG.rst', 'r').read(),
     author='Praekelt Foundation',
