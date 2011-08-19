@@ -1,6 +1,22 @@
 import unittest
+import inspect
+        
+from django.db import models
 
-class SampleTestCase(unittest.TestCase):
+from export import fields
 
-    def test_something(self):
-        raise NotImplementedError("Tisk tisk, seems like tests are not completely implemented. Bad developer!") 
+
+class FieldsTestCase(unittest.TestCase):
+
+    def test_field_types(self):
+
+        for key, value in models.__dict__.iteritems():
+            try:
+                bases = inspect.getmro(value)
+            except AttributeError:
+                bases = None
+            if bases:
+                if models.fields.Field in bases:
+                    getattr(fields, key)
+
+#        raise NotImplementedError("Tisk tisk, missing tests. Bad developer!") 
