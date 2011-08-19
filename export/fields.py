@@ -2,8 +2,8 @@ import datetime
 import time
 
 from django import forms
-from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
-from django.core import validators
+from django.contrib.admin.widgets import AdminDateWidget, AdminIntegerFieldWidget, AdminTimeWidget
+from django.core import exceptions, validators
 from django.core.exceptions import ValidationError
 from django.utils import formats        
 from django.utils.safestring import mark_safe
@@ -15,13 +15,12 @@ class AdminSplitDateTime(forms.SplitDateTimeWidget):
     """
     def __init__(self, attrs=None):
         widgets = [AdminDateWidget, AdminTimeWidget, AdminDateWidget, AdminTimeWidget]
-        # Note that we're calling MultiWidget, not SplitDateTimeWidget, because
-        # we want to define widgets.
         forms.MultiWidget.__init__(self, widgets, attrs)
 
     def format_output(self, rendered_widgets):
         return mark_safe(u'<p class="datetime">%s %s %s %s</p><p class="datetime">%s %s %s %s</p>' % \
             (_('Start Date:'), rendered_widgets[0], _(' Start Time:'), rendered_widgets[1], _('End Date:'), rendered_widgets[2], _('End Time:'), rendered_widgets[3]))
+
 
 class AdminSplitDate(forms.SplitDateTimeWidget):
     """
@@ -29,13 +28,25 @@ class AdminSplitDate(forms.SplitDateTimeWidget):
     """
     def __init__(self, attrs=None):
         widgets = [AdminDateWidget, AdminDateWidget]
-        # Note that we're calling MultiWidget, not SplitDateTimeWidget, because
-        # we want to define widgets.
         forms.MultiWidget.__init__(self, widgets, attrs)
 
     def format_output(self, rendered_widgets):
         return mark_safe(u'<p class="datetime">%s %s %s %s</p>' % \
             (_('Start Date:'), rendered_widgets[0], _('End Date:'), rendered_widgets[1]))
+
+
+class AdminSplitInteger(forms.SplitDateTimeWidget):
+    """
+    A SplitInteger Widget that has some admin-specific styling.
+    """
+    def __init__(self, attrs=None):
+        widgets = [AdminIntegerFieldWidget, AdminIntegerFieldWidget]
+        forms.MultiWidget.__init__(self, widgets, attrs)
+
+    def format_output(self, rendered_widgets):
+        return mark_safe(u'<p class="datetime">%s %s %s %s</p>' % \
+            (_('Min:'), rendered_widgets[0], _('Max:'), rendered_widgets[1]))
+
 
 class BasicTextField(forms.fields.CharField):
     def __init__(self, field, *args, **kwargs):
@@ -128,10 +139,10 @@ class DateField(forms.fields.DateTimeField):
     
     def filter(self, name, value, queryset):
         kwargs = {}
-        # Filter start datetime.
+        # Filter start date.
         if value[0]:
             kwargs['%s__gte' % name] = value[0]
-        # Filter end datetime.
+        # Filter end date.
         if value[1]:
             kwargs['%s__lte' % name] = value[1]
         return queryset.filter(**kwargs)
@@ -189,6 +200,50 @@ class DateTimeField(forms.fields.DateTimeField):
         if value[0]:
             kwargs['%s__gte' % name] = value[0]
         # Filter end datetime.
+        if value[1]:
+            kwargs['%s__lte' % name] = value[1]
+        return queryset.filter(**kwargs)
+
+
+class IntegerField(forms.fields.IntegerField):
+    def __init__(self, field, *args, **kwargs):
+        super(IntegerField, self).__init__(
+            required = False,
+            widget = AdminSplitInteger,
+            help_text="Only objects with a '%s' value within the provided range will be exported." % field.label.lower(),
+            *args, **kwargs
+        )
+    
+    def to_python(self, value):
+        if value in validators.EMPTY_VALUES:
+            return None
+        if isinstance(value, list):
+            if len(value) != 2:
+                raise ValidationError(self.error_messages['invalid'])
+            if value[0] in validators.EMPTY_VALUES and value[1] in validators.EMPTY_VALUES:
+                return None
+
+        min = None
+        max = None
+        if value[0] not in validators.EMPTY_VALUES:
+            try:
+                min = int(value[0])
+            except (TypeError, ValueError):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+        if value[1] not in validators.EMPTY_VALUES:
+            try:
+                max = int(value[1])
+            except (TypeError, ValueError):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+        
+        return (min, max)
+    
+    def filter(self, name, value, queryset):
+        kwargs = {}
+        # Filter min.
+        if value[0]:
+            kwargs['%s__gte' % name] = value[0]
+        # Filter max.
         if value[1]:
             kwargs['%s__lte' % name] = value[1]
         return queryset.filter(**kwargs)
