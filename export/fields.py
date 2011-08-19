@@ -23,6 +23,19 @@ class AdminSplitDateTime(forms.SplitDateTimeWidget):
         return mark_safe(u'<p class="datetime">%s %s %s %s</p><p class="datetime">%s %s %s %s</p>' % \
             (_('Start Date:'), rendered_widgets[0], _(' Start Time:'), rendered_widgets[1], _('End Date:'), rendered_widgets[2], _('End Time:'), rendered_widgets[3]))
 
+class AdminSplitDate(forms.SplitDateTimeWidget):
+    """
+    A SplitDate Widget that has some admin-specific styling.
+    """
+    def __init__(self, attrs=None):
+        widgets = [AdminDateWidget, AdminDateWidget]
+        # Note that we're calling MultiWidget, not SplitDateTimeWidget, because
+        # we want to define widgets.
+        forms.MultiWidget.__init__(self, widgets, attrs)
+
+    def format_output(self, rendered_widgets):
+        return mark_safe(u'<p class="datetime">%s %s %s %s</p>' % \
+            (_('Start Date:'), rendered_widgets[0], _('End Date:'), rendered_widgets[1]))
 
 class BasicTextField(forms.fields.CharField):
     def __init__(self, field, *args, **kwargs):
@@ -64,6 +77,64 @@ class BooleanField(forms.fields.ChoiceField):
 
 class CharField(BasicTextField):
     pass
+
+class DateField(forms.fields.DateTimeField):
+    def __init__(self, field, *args, **kwargs):
+        super(DateField, self).__init__(
+            required = False,
+            widget = AdminSplitDate,
+            help_text="Only objects with a '%s' date within the provided range will be exported." % field.label.lower(),
+            *args, **kwargs
+        )
+    
+    def to_python(self, value):
+        """
+        Validates that the input can be converted to a date. Returns a
+        Python datetime.date object.
+        """
+        if value in validators.EMPTY_VALUES:
+            return None
+        if isinstance(value, datetime.datetime):
+            return value.date()
+        if isinstance(value, datetime.date):
+            return value
+        if isinstance(value, list):
+            # Input comes from a 2 SplitDateWidgets, for example. So, it's two
+            # components: start date and end date.
+            if len(value) != 2:
+                raise ValidationError(self.error_messages['invalid'])
+            if value[0] in validators.EMPTY_VALUES and value[1] in validators.EMPTY_VALUES:
+                return None
+
+            start_value = value[0]
+            end_value = value[1]
+        
+        start_date = None
+        end_date = None
+
+        for format in self.input_formats or formats.get_format('DATETIME_INPUT_FORMATS'):
+            try:
+                start_date = datetime.datetime(*time.strptime(start_value, format)[:6]).date()
+            except ValueError:
+                continue
+        
+        for format in self.input_formats or formats.get_format('DATETIME_INPUT_FORMATS'):
+            try:
+                end_date = datetime.datetime(*time.strptime(end_value, format)[:6]).date()
+            except ValueError:
+                continue
+
+        return (start_date, end_date)
+    
+    def filter(self, name, value, queryset):
+        kwargs = {}
+        # Filter start datetime.
+        if value[0]:
+            kwargs['%s__gte' % name] = value[0]
+        # Filter end datetime.
+        if value[1]:
+            kwargs['%s__lte' % name] = value[1]
+        return queryset.filter(**kwargs)
 
 
 class DateTimeField(forms.fields.DateTimeField):
@@ -116,10 +187,10 @@ class DateTimeField(forms.fields.DateTimeField):
         kwargs = {}
         # Filter start datetime.
         if value[0]:
-            kwargs = {'%s__gte' % name: value[0]}
+            kwargs['%s__gte' % name] = value[0]
         # Filter end datetime.
         if value[1]:
-            kwargs = {'%s__lte' % name: value[1]}
+            kwargs['%s__lte' % name] = value[1]
         return queryset.filter(**kwargs)
 
 
