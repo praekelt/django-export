@@ -1,5 +1,6 @@
 import datetime
 import time
+from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget, AdminIntegerFieldWidget, AdminTimeWidget
@@ -8,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils import formats        
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+
 
 class AdminSplitDateTime(forms.SplitDateTimeWidget):
     """
@@ -33,6 +35,19 @@ class AdminSplitDate(forms.SplitDateTimeWidget):
     def format_output(self, rendered_widgets):
         return mark_safe(u'<p class="datetime">%s %s %s %s</p>' % \
             (_('Start Date:'), rendered_widgets[0], _('End Date:'), rendered_widgets[1]))
+
+
+class AdminSplitTime(forms.SplitDateTimeWidget):
+    """
+    A SplitDate Widget that has some admin-specific styling.
+    """
+    def __init__(self, attrs=None):
+        widgets = [AdminTimeWidget, AdminTimeWidget]
+        forms.MultiWidget.__init__(self, widgets, attrs)
+
+    def format_output(self, rendered_widgets):
+        return mark_safe(u'<p class="datetime">%s %s %s %s</p>' % \
+            (_('Start Time:'), rendered_widgets[0], _('End Time:'), rendered_widgets[1]))
 
 
 class AdminSplitInteger(forms.SplitDateTimeWidget):
@@ -89,7 +104,8 @@ class BooleanField(forms.fields.ChoiceField):
 class CharField(BasicTextField):
     pass
 
-class DateField(forms.fields.DateTimeField):
+
+class DateField(forms.fields.DateField):
     def __init__(self, field, *args, **kwargs):
         super(DateField, self).__init__(
             required = False,
@@ -123,13 +139,13 @@ class DateField(forms.fields.DateTimeField):
         start_date = None
         end_date = None
 
-        for format in self.input_formats or formats.get_format('DATETIME_INPUT_FORMATS'):
+        for format in self.input_formats or formats.get_format('DATE_INPUT_FORMATS'):
             try:
                 start_date = datetime.datetime(*time.strptime(start_value, format)[:6]).date()
             except ValueError:
                 continue
         
-        for format in self.input_formats or formats.get_format('DATETIME_INPUT_FORMATS'):
+        for format in self.input_formats or formats.get_format('DATE_INPUT_FORMATS'):
             try:
                 end_date = datetime.datetime(*time.strptime(end_value, format)[:6]).date()
             except ValueError:
@@ -249,6 +265,67 @@ class IntegerField(forms.fields.IntegerField):
         return queryset.filter(**kwargs)
 
 
+class DecimalField(forms.fields.DecimalField):
+    def __init__(self, field, *args, **kwargs):
+        super(DecimalField, self).__init__(
+            required = False,
+            widget = AdminSplitInteger,
+            help_text="Only objects with a '%s' value within the provided range will be exported." % field.label.lower(),
+            *args, **kwargs
+        )
+    
+    def to_python(self, value):
+        if value in validators.EMPTY_VALUES:
+            return None
+        if isinstance(value, list):
+            if len(value) != 2:
+                raise ValidationError(self.error_messages['invalid'])
+            if value[0] in validators.EMPTY_VALUES and value[1] in validators.EMPTY_VALUES:
+                return None
+
+        min = None
+        max = None
+        if value[0] not in validators.EMPTY_VALUES:
+            try:
+                min = Decimal(value[0])
+            except (TypeError, ValueError, InvalidOperation):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+        if value[1] not in validators.EMPTY_VALUES:
+            try:
+                max = Decimal(value[1])
+            except (TypeError, ValueError, InvalidOperation):
+                raise exceptions.ValidationError(self.error_messages['invalid'])
+       
+        return (min, max)
+    
+    def validate(self, value):
+        if value in validators.EMPTY_VALUES:
+            return
+        return (super(DecimalField, self).validate(value[0]), super(DecimalField, self).validate(value[1]))
+    
+    def filter(self, name, value, queryset):
+        kwargs = {}
+        # Filter min.
+        if value[0]:
+            kwargs['%s__gte' % name] = value[0]
+        # Filter max.
+        if value[1]:
+            kwargs['%s__lte' % name] = value[1]
+        return queryset.filter(**kwargs)
+
+
+class BigIntegerField(IntegerField):
+    pass
+
+
+class PositiveIntegerField(IntegerField):
+    pass
+
+
+class SmallIntegerField(IntegerField):
+    pass
+
+
 class EmailField(BasicTextField):
     pass
 
@@ -281,6 +358,81 @@ class ModelMultipleChoiceField(forms.models.ModelMultipleChoiceField):
     def filter(self, name, value, queryset):
         kwargs = {'%s__in' % name: value}
         return queryset.filter(**kwargs)
+
+
+class TextField(BasicTextField):
+    pass
+
+
+class TimeField(forms.fields.TimeField):
+    def __init__(self, field, *args, **kwargs):
+        super(TimeField, self).__init__(
+            required = False,
+            widget = AdminSplitTime,
+            help_text="Only objects with a '%s' time within the provided range will be exported." % field.label.lower(),
+            *args, **kwargs
+        )
+    
+    def to_python(self, value):
+        """
+        Validates that the input can be converted to a time. Returns a
+        Python datetime.time object.
+        """
+        if value in validators.EMPTY_VALUES:
+            return None
+        if isinstance(value, datetime.datetime):
+            return value.time()
+        if isinstance(value, datetime.time):
+            return value
+        if isinstance(value, list):
+            # Input comes from a 2 SplitTimeWidgets, for example. So, it's two
+            # components: start time and end time.
+            if len(value) != 2:
+                raise ValidationError(self.error_messages['invalid'])
+            if value[0] in validators.EMPTY_VALUES and value[1] in validators.EMPTY_VALUES:
+                return None
+
+            start_value = value[0]
+            end_value = value[1]
+        
+        start_time = None
+        end_time = None
+
+        for format in self.input_formats or formats.get_format('TIME_INPUT_FORMATS'):
+            try:
+                start_time = datetime.datetime(*time.strptime(start_value, format)[:6]).time()
+            except ValueError:
+                if start_time:
+                    continue
+                else:
+                    raise ValidationError(self.error_messages['invalid'])
+        
+
+        for format in self.input_formats or formats.get_format('TIME_INPUT_FORMATS'):
+            try:
+                end_time = datetime.datetime(*time.strptime(end_value, format)[:6]).time()
+            except ValueError:
+                if end_time:
+                    continue
+                else:
+                    raise ValidationError(self.error_messages['invalid'])
+
+        return (start_time, end_time)
+    
+    def filter(self, name, value, queryset):
+        kwargs = {}
+        # Filter start date.
+        if value[0]:
+            kwargs['%s__gte' % name] = value[0]
+        # Filter end date.
+        if value[1]:
+            kwargs['%s__lte' % name] = value[1]
+        
+        return queryset.filter(**kwargs)
+
+
+class SlugField(BasicTextField):
+    pass
 
 
 class URLField(BasicTextField):
