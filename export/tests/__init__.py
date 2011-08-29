@@ -1,13 +1,11 @@
 import inspect
 import unittest
-        
-from django.db import models
-
-from export import fields
 
 
 class FieldsTestCase(unittest.TestCase):
     def test_field_types(self):
+        from django.db import models
+        from export import fields
 
         for key, value in models.__dict__.iteritems():
             try:
@@ -15,5 +13,6 @@ class FieldsTestCase(unittest.TestCase):
             except AttributeError:
                 bases = None
             if bases:
-                if models.fields.Field in bases and value != models.fields.Field:
+                if models.fields.Field in bases and value != \
+                        models.fields.Field:
                     getattr(fields, key)

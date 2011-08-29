@@ -4,4 +4,3 @@ import mimetypes
 if not mimetypes.inited:
     mimetypes.init()
 mimetypes.add_type('text/x-yaml', '.yaml')
-

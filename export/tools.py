@@ -53,7 +53,8 @@ class Export(object_tools.ObjectTool):
 
         data = self.serialize(format, queryset, fields)
         filename = self.gen_filename(format)
-        response = HttpResponse(data, mimetype=mimetypes.guess_type(filename)[0])
+        response = HttpResponse(data, mimetype=mimetypes.guess_type(\
+                filename)[0])
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
@@ -68,6 +69,7 @@ class Export(object_tools.ObjectTool):
         context = {'adminform': adminform}
         context.update(extra_context or {})
         context_instance = template.RequestContext(request)
-        return render_to_response('export/export_form.html', context, context_instance=context_instance)
+        return render_to_response('export/export_form.html', context, \
+                context_instance=context_instance)
 
 object_tools.tools.register(Export)
