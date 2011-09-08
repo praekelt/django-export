@@ -1,10 +1,4 @@
 from setuptools import setup, find_packages
-from setuptools.command.test import test
-
-def run_tests(self):
-    from setuptest.runtests import runtests
-    return runtests(self)
-test.run_tests = run_tests
 
 setup(
     name='django-export',
@@ -20,10 +14,10 @@ setup(
         'django-snippetscream>0.0.4',
     ],
     tests_require = [
-        'django-setuptest',
+        'django-setuptest>=0.0.6',
     ],
     include_package_data=True,
-    test_suite = "export.tests",
+    test_suite = "setuptest.SetupTestSuite",
     classifiers = [
         "Programming Language :: Python",
         "License :: OSI Approved :: BSD License",
