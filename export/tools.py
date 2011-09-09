@@ -19,9 +19,9 @@ class Export(object_tools.ObjectTool):
     def serialize(self, format, queryset, fields):
         serializer = serializers.get_serializer(format)()
         if fields:
-            return serializer.serialize(queryset, fields=fields)
+            return serializer.serialize(queryset, fields=fields, indent=4)
         else:
-            return serializer.serialize(queryset)
+            return serializer.serialize(queryset, indent=4)
 
     def gen_filename(self, format):
         app_label = self.model._meta.app_label
