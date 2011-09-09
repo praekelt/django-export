@@ -19,6 +19,13 @@ Installation
 
 #. Add ``export`` to your ``INSTALLED_APPS`` setting.
 
+#. Optionally for exporting in CSV you need to add ``snippetscream.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
+    
+    SERIALIZATION_MODULES = {
+        # ...
+        'csv': 'snippetscream.csv_serializer',
+    }
+
 Usage
 -----
 
