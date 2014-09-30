@@ -258,6 +258,14 @@ class DateTimeField(forms.fields.DateTimeField):
         return queryset.filter(**kwargs)
 
 
+class Field(forms.fields.Field):
+    def __init__(self, field, *args, **kwargs):
+        super(Field, self).__init__(
+            required=False,
+            *args, **kwargs
+        )
+
+
 class FileField(BasicTextField):
     pass
 
