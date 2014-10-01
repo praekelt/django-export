@@ -480,7 +480,7 @@ class OneToOneField(ModelMultipleChoiceField):
 
 
 class ForeignKey(ModelMultipleChoiceField):
-    pass
+    pass85
 
 
 class ManyToManyField(ModelMultipleChoiceField):
