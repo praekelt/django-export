@@ -349,16 +349,14 @@ class FloatField(forms.fields.FloatField):
             try:
                 min = float(value[0])
             except (TypeError, ValueError):
-                raise exceptions.ValidationError(\
-                        self.error_messages['invalid'])
+                raise exceptions.ValidationError(self.error_messages['invalid'])
         if value[1] not in validators.EMPTY_VALUES:
             try:
                 max = float(value[1])
             except (TypeError, ValueError):
-                raise exceptions.ValidationError(\
-                        self.error_messages['invalid'])
+                raise exceptions.ValidationError(self.error_messages['invalid'])
 
-        return (min, max)
+        return min, max
 
     def filter(self, name, value, queryset):
         kwargs = {}
@@ -408,7 +406,7 @@ class DecimalField(forms.fields.DecimalField):
             except (TypeError, ValueError, InvalidOperation):
                 raise exceptions.ValidationError(self.error_messages['invalid'])
 
-        return (min, max)
+        return min, max
 
     def validate(self, value):
         if value in validators.EMPTY_VALUES:
@@ -480,7 +478,7 @@ class OneToOneField(ModelMultipleChoiceField):
 
 
 class ForeignKey(ModelMultipleChoiceField):
-    pass85
+    pass
 
 
 class ManyToManyField(ModelMultipleChoiceField):
@@ -530,8 +528,9 @@ class TimeField(forms.fields.TimeField):
         for format in self.input_formats or formats.get_format(\
                 'TIME_INPUT_FORMATS'):
             try:
-                start_time = datetime.datetime(*time.strptime(start_value, \
-                        format)[:6]).time()
+                start_time = datetime.datetime(
+                    *time.strptime(start_value, format)[:6]
+                ).time()
             except ValueError:
                 if start_time:
                     continue
@@ -541,8 +540,9 @@ class TimeField(forms.fields.TimeField):
         for format in self.input_formats or formats.get_format(\
                 'TIME_INPUT_FORMATS'):
             try:
-                end_time = datetime.datetime(*time.strptime(end_value, \
-                        format)[:6]).time()
+                end_time = datetime.datetime(
+                    *time.strptime(end_value, format)[:6]
+                ).time()
             except ValueError:
                 if end_time:
                     continue
