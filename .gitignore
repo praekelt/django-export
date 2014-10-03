@@ -1,3 +1,7 @@
 *.egg-info
 *.pyc
 *.swp
+*.egg
+coverage.xml
+.tox
+pep8.txt
