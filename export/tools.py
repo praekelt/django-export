@@ -16,7 +16,7 @@ class Export(object_tools.ObjectTool):
     help_text = 'Export filtered objects for download.'
     form_class = forms.Export
 
-    def serialize(self, format, queryset, fields):
+    def serialize(self, format, queryset, fields=[]):
         serializer = serializers.get_serializer(format)()
         if fields:
             return serializer.serialize(queryset, fields=fields, indent=4)
