@@ -12,10 +12,6 @@ class MockDjangoObject(models.Model):
     field2 = models.IntegerField()
 
 
-class MockDjangoQuerySet(models.QuerySet):
-    pass
-
-
 class FieldsTestCase(unittest.TestCase):
     def test_field_types(self):
         from django.db import models
@@ -50,8 +46,8 @@ class ToolsTestCase(unittest.TestCase):
 
     def test_serialize(self):
         self.assertRaises(TypeError, self.export.serialize, args=[object])
-        self.assertIsInstance(
-            self.export.serialize('json', queryset=[]), unicode
+        self.assertIn(
+            type(self.export.serialize('json', queryset=[])), [unicode, str]
         )
         object_list = json.loads(
             self.export.serialize('json', queryset=[self.obj])
