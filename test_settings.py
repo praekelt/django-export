@@ -23,5 +23,7 @@ SERIALIZATION_MODULES = {
     'csv': 'export.serializers.csv_serializer'
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
 ROOT_URLCONF = 'object_tools.tests.urls'
 STATIC_URL = '/static/'
