@@ -19,5 +19,9 @@ INSTALLED_APPS = [
     'export'
 ]
 
+SERIALIZATION_MODULES = {
+    'csv': 'export.serializers.csv_serializer'
+}
+
 ROOT_URLCONF = 'object_tools.tests.urls'
 STATIC_URL = '/static/'
