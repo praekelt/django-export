@@ -7,7 +7,11 @@
             {% include "admin/includes/fieldset.html" %}
         {% endfor %}
         <div class="submit-row">
+            <input type="submit" value="{% trans "Email" %}" class="default" name="_{{ tool.name }}_mail" />
             <input type="submit" value="{% trans tool.label %}" class="default" name="_{{ tool.name }}" />
         </div>
-    </form> 
+    </form>
 {% endblock %}
+
+
+file:///Users/jonathanb/Projects/Kagiso/ZAlebs/eggs/jmbo-1.0.14-py2.7.egg/jmbo/templates/admin
