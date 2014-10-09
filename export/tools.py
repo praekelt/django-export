@@ -58,20 +58,20 @@ class Export(object_tools.ObjectTool):
         return format, data
 
     def export_response(self, form):
-        data, format = self.get_data(form)
+        format, data = self.get_data(form)
         filename = self.gen_filename(format)
         response = HttpResponse(
-            data, mimetype=mimetypes.guess_type(filename)[0]
+            data, content_type=mimetypes.guess_type(filename)[0]
         )
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
     def mail_response(self, form, request):
-        data, format = self.get_data(form)
+        format, data = self.get_data(form)
         filename = self.gen_filename('zip')
 
         zip_data = StringIO.StringIO()
-        zipfile = ZipFile(zip_data, mode='w')
+        zipfile = ZipFile(unicode(zip_data), mode='w')
         zipfile.writestr(filename, data)
         zipfile.close()
 
@@ -81,10 +81,12 @@ class Export(object_tools.ObjectTool):
         email.attach(filename, zip_data.getvalue(), 'application/zip')
         email.send()
 
+        zipfile.close()
+
     def view(self, request, extra_context=None):
         form = extra_context['form']
         if form.is_valid():
-            if form.cleaned_data['email_export']:
+            if '_export_mail' in request.POST:
                 return self.mail_response(form, request)
             return self.export_response(form)
 
