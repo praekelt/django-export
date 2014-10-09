@@ -4,7 +4,7 @@ import unittest
 
 from django.db import models
 
-from export import fields, forms, tools
+from export import fields, tools
 
 
 class MockDjangoObject(models.Model):
