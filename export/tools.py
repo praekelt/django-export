@@ -5,6 +5,7 @@ from zipfile import ZipFile
 from django import template
 from django.core import serializers
 from django.core.mail import EmailMessage
+from django.contrib import messages
 from django.contrib.admin import helpers
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -66,7 +67,8 @@ class Export(object_tools.ObjectTool):
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
-    def mail_response(self, form, request):
+    def mail_response(self, request, extra_context=None):
+        form = extra_context['form']
         format, data = self.get_data(form)
         filename = self.gen_filename('zip')
 
@@ -83,11 +85,20 @@ class Export(object_tools.ObjectTool):
 
         zipfile.close()
 
-    def view(self, request, extra_context=None):
+        messages.add_message(
+            request, messages.SUCCESS,
+            'The export has been generated and will be emailed to %s.' % (
+                request.user.email
+            )
+        )
+
+        return self.view(request, extra_context=extra_context, process_form=False)
+
+    def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
-        if form.is_valid():
+        if form.is_valid() and process_form:
             if '_export_mail' in request.POST:
-                return self.mail_response(form, request)
+                return self.mail_response(request, extra_context)
             return self.export_response(form)
 
         adminform = helpers.AdminForm(form, form.fieldsets, {})
