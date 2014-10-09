@@ -4,7 +4,7 @@ import unittest
 
 from django.db import models
 
-from export import tools
+from export import fields, forms, tools
 
 
 class MockDjangoObject(models.Model):
@@ -14,8 +14,6 @@ class MockDjangoObject(models.Model):
 
 class FieldsTestCase(unittest.TestCase):
     def test_field_types(self):
-        from django.db import models
-        from export import fields
 
         # Very likely need to look into adding support for these field types
         skip_fields = [
@@ -45,7 +43,9 @@ class ToolsTestCase(unittest.TestCase):
         self.obj = MockDjangoObject(field1=1, field2=2)
 
     def test_serialize(self):
-        self.assertRaises(TypeError, self.export.serialize, args=[object])
+        self.assertRaises(
+            TypeError, self.export.serialize, args=['json', object]
+        )
         self.assertIn(
             type(self.export.serialize('json', queryset=[])), [unicode, str]
         )
@@ -63,6 +63,10 @@ class ToolsTestCase(unittest.TestCase):
         )
         self.assertEqual(object_list[0]['fields']['field1'], self.obj.field1)
         self.assertNotIn('field2', object_list[0]['fields'])
+
+    def test_serialize_formats(self):
+        for format in ['csv', 'json', 'python', 'xml']:
+            self.assertTrue(self.export.serialize(format, queryset=[self.obj]))
 
     def test_gen_filename(self):
         self.assertEqual(
