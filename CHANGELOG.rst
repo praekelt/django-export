@@ -1,10 +1,17 @@
 Changelog
 =========
 
+1.0.0 (2014-10-13)
+------------------
+#. CSV serialiser (included into project)
+#. Email exported data to logged in user
+#. Django 1.7 Compatability
+#. Travis/tox integration
+
 0.0.4 (2011-09-09)
 ------------------
 #. Indent output making it human readable, thanks bevenky.
-#. Note on enabling CSV. 
+#. Note on enabling CSV.
 
 0.0.3 (2011-08-23)
 ------------------
@@ -18,4 +25,3 @@ Changelog
 ------------------
 
 #. Initial release.
-
