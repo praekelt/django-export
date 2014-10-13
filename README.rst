@@ -2,6 +2,9 @@ Django Export
 =============
 **Django app allowing for filtered exporting of model object data.**
 
+.. image:: https://travis-ci.org/praekelt/django-export.svg
+    :target: https://travis-ci.org/praekelt/django-export
+
 django-export allows you to export model objects in a wide range of serialized formats (JSON, CSV, XML, YAML). Exports can be filtered and ordered on any of the particular model's fields.
 
 django-export utilizes `django-object-tools <http://pypi.python.org/pypi/django-object-tools>`_ to hook into Django's admin interface and take care of user permissions.
@@ -19,11 +22,10 @@ Installation
 
 #. Add ``export`` to your ``INSTALLED_APPS`` setting.
 
-#. Optionally for exporting in CSV you need to add ``snippetscream.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
-    
+#. Optionally for exporting in CSV you need to add ``export.serializers.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
+
     SERIALIZATION_MODULES = {
-        # ...
-        'csv': 'snippetscream.csv_serializer',
+        'csv': 'export.serializers.csv_serializer'
     }
 
 Usage
@@ -31,9 +33,8 @@ Usage
 
 Once installed you should see an **Export** object tool enabled on all admin change list views.
 
-.. image:: https://github.com/downloads/praekelt/django-export/export_example.png
+.. image:: https://raw.githubusercontent.com/praekelt/django-export/feature/issue-9-mail-export-data/docs/images/export_example.png
 
 If you don't see the tool make sure the logged in user has the appropriate export user permission assigned (or set user as superuser).
 
 Clicking the **Export** tool link takes you to an export page on which you can specify format, ordering and filtering of the objects you want to export. The export is delivered as a download in whichever format you select.
-
