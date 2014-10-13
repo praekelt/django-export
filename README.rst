@@ -22,11 +22,10 @@ Installation
 
 #. Add ``export`` to your ``INSTALLED_APPS`` setting.
 
-#. Optionally for exporting in CSV you need to add ``snippetscream.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
+#. Optionally for exporting in CSV you need to add ``export.serializers.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
 
     SERIALIZATION_MODULES = {
-        # ...
-        'csv': 'snippetscream.csv_serializer',
+        'csv': 'export.serializers.csv_serializer'
     }
 
 Usage
@@ -34,7 +33,7 @@ Usage
 
 Once installed you should see an **Export** object tool enabled on all admin change list views.
 
-.. image:: https://github.com/downloads/praekelt/django-export/export_example.png
+.. image:: https://raw.githubusercontent.com/praekelt/django-export/feature/issue-9-mail-export-data/docs/images/export_example.png
 
 If you don't see the tool make sure the logged in user has the appropriate export user permission assigned (or set user as superuser).
 
