@@ -21,7 +21,7 @@ http://docs.djangoproject.com/en/1.2/topics/serialization/
 import codecs
 import csv
 import re
-import StringIO
+from StringIO import StringIO
 
 from itertools import groupby
 from operator import itemgetter
