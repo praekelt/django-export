@@ -2,6 +2,7 @@
 *.pyc
 *.swp
 *.egg
+dist/
 coverage.xml
 .tox
 pep8.txt
