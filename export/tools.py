@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.utils.translation import ugettext as _
 
 import object_tools
 from export import forms, tasks, utils
@@ -82,12 +83,9 @@ class Export(object_tools.ObjectTool):
         form = extra_context['form']
         if form.is_valid() and process_form:
             if '_export_mail' in request.POST:
-                messages.add_message(
-                    request, messages.SUCCESS,
-                    'The export has been generated and will be emailed to %s.' % (
-                        request.user.email
-                    )
-                )
+                message = _('The export has been generated and will be emailed \
+                            to %s.' % (request.user.email))
+                messages.add_message(request, messages.SUCCESS, message)
                 self.mail_response(request, extra_context)
             else:
                 return self.export_response(form)
