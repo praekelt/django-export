@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 import object_tools
-from export import forms, tasks
+from export import forms, tasks, utils
 
 
 class Export(object_tools.ObjectTool):
@@ -76,7 +76,7 @@ class Export(object_tools.ObjectTool):
         # if celery is available send the task, else run as normal
         if self.has_celery():
             return tasks.mail_export.delay(request.user.email, filename, data)
-        return tasks.mail_export(request, filename, data)
+        return utils.mail_export(request, filename, data)
 
     def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
