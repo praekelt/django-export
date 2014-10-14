@@ -1,17 +1,15 @@
 import mimetypes
-import StringIO
-from zipfile import ZipFile
 
 from django import template
+from django.conf import settings
 from django.core import serializers
-from django.core.mail import EmailMessage
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 import object_tools
-from export import forms
+from export import forms, tasks
 
 
 class Export(object_tools.ObjectTool):
@@ -40,6 +38,9 @@ class Export(object_tools.ObjectTool):
         else:
             order_str = by
         return queryset.order_by(order_str)
+
+    def has_celery(self):
+        return 'djcelery' in getattr(settings, 'INSTALLED_APPS', [])
 
     def get_data(self, form):
         queryset = self.model.objects.all()
@@ -72,34 +73,24 @@ class Export(object_tools.ObjectTool):
         format, data = self.get_data(form)
         filename = self.gen_filename('zip')
 
-        zip_data = StringIO.StringIO()
-        zipfile = ZipFile(unicode(zip_data), mode='w')
-        zipfile.writestr(filename, data)
-        zipfile.close()
-
-        subject = "Database Export"
-        message = "Database Export Attached"
-        email = EmailMessage(subject, message, to=[request.user.email])
-        email.attach(filename, zip_data.getvalue(), 'application/zip')
-        email.send()
-
-        zipfile.close()
-
-        messages.add_message(
-            request, messages.SUCCESS,
-            'The export has been generated and will be emailed to %s.' % (
-                request.user.email
-            )
-        )
-
-        return self.view(request, extra_context=extra_context, process_form=False)
+        # if celery is available send the task, else run as normal
+        if self.has_celery():
+            return tasks.mail_export.delay(request.user.email, filename, data)
+        return tasks.mail_export(request, filename, data)
 
     def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
         if form.is_valid() and process_form:
             if '_export_mail' in request.POST:
-                return self.mail_response(request, extra_context)
-            return self.export_response(form)
+                messages.add_message(
+                    request, messages.SUCCESS,
+                    'The export has been generated and will be emailed to %s.' % (
+                        request.user.email
+                    )
+                )
+                self.mail_response(request, extra_context)
+            else:
+                return self.export_response(form)
 
         adminform = helpers.AdminForm(form, form.fieldsets, {})
 
@@ -112,6 +103,5 @@ class Export(object_tools.ObjectTool):
             context,
             context_instance=context_instance
         )
-
 
 object_tools.tools.register(Export)
