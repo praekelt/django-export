@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.0.1 (2014-10-15)
+------------------
+#. Add celery support to move email task to a background process
+
 1.0.0 (2014-10-13)
 ------------------
 #. CSV serialiser (included into project)
