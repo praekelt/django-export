@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 
 def mail_export(email, filename, data):
     zip_data = StringIO.StringIO()
-    zipfile = ZipFile(unicode(zip_data), mode='w')
+    zipfile = ZipFile(zip_data, mode='w')
     zipfile.writestr(filename, data)
     zipfile.close()
 
@@ -17,4 +17,4 @@ def mail_export(email, filename, data):
     email.attach(filename, zip_data.getvalue(), 'application/zip')
     email.send()
 
-    zipfile.close()
+    zip_data.close()
