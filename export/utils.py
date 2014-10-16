@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 def mail_export(email, filename, data):
     zip_data = StringIO.StringIO()
     zipfile = ZipFile(zip_data, mode='w')
-    zipfile.writestr(str(filename), str(data))
+    zipfile.writestr(str(filename), data.encode('utf-8'))
     zipfile.close()
 
     subject = _("Database Export")
