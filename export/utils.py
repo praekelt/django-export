@@ -15,6 +15,7 @@ def mail_export(email, filename, data):
     message = _("Database Export Attached")
     email = EmailMessage(subject, message, to=[email])
     email.attach(filename, zip_data.getvalue(), 'application/zip')
-    email.send()
 
     zip_data.close()
+
+    return email.send()
