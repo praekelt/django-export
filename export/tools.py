@@ -2,7 +2,7 @@ import mimetypes
 
 from django import template
 from django.conf import settings
-from django.core import serializers
+
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.http import HttpResponse
@@ -20,11 +20,7 @@ class Export(object_tools.ObjectTool):
     form_class = forms.Export
 
     def serialize(self, format, queryset, fields=[]):
-        serializer = serializers.get_serializer(format)()
-        if fields:
-            return serializer.serialize(queryset, fields=fields, indent=4)
-        else:
-            return serializer.serialize(queryset, indent=4)
+        return utils.serialize(format, queryset, fields)
 
     def gen_filename(self, format):
         app_label = self.model._meta.app_label
@@ -43,7 +39,7 @@ class Export(object_tools.ObjectTool):
     def has_celery(self):
         return 'djcelery' in getattr(settings, 'INSTALLED_APPS', [])
 
-    def get_data(self, form):
+    def get_queryset(self, form):
         queryset = self.model.objects.all()
         for name, value in form.cleaned_data.iteritems():
             if name not in form.fieldsets[0][1]['fields']:
@@ -52,8 +48,10 @@ class Export(object_tools.ObjectTool):
 
         order_by = form.cleaned_data['export_order_by']
         order_direction = form.cleaned_data['export_order_direction']
-        queryset = self.order(queryset, order_by, order_direction)
+        return self.order(queryset, order_by, order_direction)
 
+    def get_data(self, form):
+        queryset = self.get_queryset(form)
         format = form.cleaned_data['export_format']
         fields = form.cleaned_data['export_fields']
         data = self.serialize(format, queryset, fields)
@@ -71,13 +69,20 @@ class Export(object_tools.ObjectTool):
 
     def mail_response(self, request, extra_context=None):
         form = extra_context['form']
-        format, data = self.get_data(form)
         filename = self.gen_filename('zip')
+
+        serializer_kwargs = {
+            'fields': form.cleaned_data['export_fields'],
+            'queryset': self.get_queryset(form),
+            'format': form.cleaned_data['export_format']
+        }
 
         # if celery is available send the task, else run as normal
         if self.has_celery():
-            return tasks.mail_export.delay(request.user.email, filename, data)
-        return utils.mail_export(request.user.email, filename, data)
+            return tasks.mail_export.delay(
+                request.user.email, filename, serializer_kwargs
+            )
+        return utils.mail_export(request.user.email, filename, serializer_kwargs)
 
     def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
