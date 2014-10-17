@@ -11,7 +11,7 @@ def mail_export(email, filename, serializer_kwargs):
 
     zip_data = StringIO.StringIO()
     zipfile = ZipFile(zip_data, mode='w')
-    zipfile.writestr(str(filename), data.encode('utf-8'))
+    zipfile.writestr(str(filename), str(data))
     zipfile.close()
 
     subject = _("Database Export")
