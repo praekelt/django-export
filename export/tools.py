@@ -30,25 +30,13 @@ class Export(object_tools.ObjectTool):
         return '%s-%s-%s.%s' % (self.name, app_label, object_name, format)
 
     def order(self, queryset, by, direction):
-        if direction == 'dsc':
-            order_str = '-%s' % by
-        else:
-            order_str = by
-        return queryset.order_by(order_str)
+        return utils.order_queryset(queryset, by, direction)
 
     def has_celery(self):
         return 'djcelery' in getattr(settings, 'INSTALLED_APPS', [])
 
     def get_queryset(self, form):
-        queryset = self.model.objects.all()
-        for name, value in form.cleaned_data.iteritems():
-            if name not in form.fieldsets[0][1]['fields']:
-                if value:
-                    queryset = form.fields[name].filter(name, value, queryset)
-
-        order_by = form.cleaned_data['export_order_by']
-        order_direction = form.cleaned_data['export_order_direction']
-        return self.order(queryset, order_by, order_direction)
+        return utils.get_queryset(form, self.model)
 
     def get_data(self, form):
         queryset = self.get_queryset(form)
@@ -69,20 +57,27 @@ class Export(object_tools.ObjectTool):
 
     def mail_response(self, request, extra_context=None):
         form = extra_context['form']
-        filename = self.gen_filename('zip')
+        format = form.cleaned_data['export_format']
+        filename = self.gen_filename(format)
 
         serializer_kwargs = {
             'fields': form.cleaned_data['export_fields'],
-            'queryset': self.get_queryset(form),
-            'format': form.cleaned_data['export_format']
+            'format': format
+        }
+
+        query_kwargs = {
+            'form': form,
+            'model': self.model
         }
 
         # if celery is available send the task, else run as normal
         if self.has_celery():
             return tasks.mail_export.delay(
-                request.user.email, filename, serializer_kwargs
+                request.user.email, filename, serializer_kwargs, query_kwargs
             )
-        return utils.mail_export(request.user.email, filename, serializer_kwargs)
+        return utils.mail_export(
+            request.user.email, filename, serializer_kwargs, query_kwargs
+        )
 
     def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
