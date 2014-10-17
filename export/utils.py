@@ -6,8 +6,8 @@ from django.core.mail import EmailMessage
 from django.utils.translation import ugettext as _
 
 
-def mail_export(email, filename, serializer_kargs):
-    data = serialize(**serializer_kargs)
+def mail_export(email, filename, serializer_kwargs):
+    data = serialize(**serializer_kwargs)
 
     zip_data = StringIO.StringIO()
     zipfile = ZipFile(zip_data, mode='w')

@@ -71,7 +71,7 @@ class Export(object_tools.ObjectTool):
         form = extra_context['form']
         filename = self.gen_filename('zip')
 
-        serializer_kargs = {
+        serializer_kwargs = {
             'fields': form.cleaned_data['export_fields'],
             'queryset': self.get_queryset(form),
             'format': form.cleaned_data['export_format']
@@ -80,9 +80,9 @@ class Export(object_tools.ObjectTool):
         # if celery is available send the task, else run as normal
         if self.has_celery():
             return tasks.mail_export.delay(
-                request.user.email, filename, serializer_kargs
+                request.user.email, filename, serializer_kwargs
             )
-        return utils.mail_export(request.user.email, filename, serializer_kargs)
+        return utils.mail_export(request.user.email, filename, serializer_kwargs)
 
     def view(self, request, extra_context=None, process_form=True):
         form = extra_context['form']
