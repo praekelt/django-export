@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.0.3 (2014-10-17)
+------------------
+#. Improved celery support
+
 1.0.2 (2014-10-17)
 ------------------
 #. Moved serializer into celery task
