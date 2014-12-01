@@ -205,14 +205,17 @@ class UnicodeReader(object):
 
 class UnicodeWriter(object):
     """
-    A CSV writer which will write rows to CSV file "f",
-    which is encoded in the given encoding.
+    A CSV writer which will write rows to CSV file "f", which is encoded in
+    the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding='utf-8', **kwds):
+    def __init__(self, f, dialect=csv.excel, encoding='utf-8',
+                 quoting=csv.QUOTE_ALL, **kwds):
         # Redirect output to a queue
         self.queue = StringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.writer = csv.writer(
+            self.queue, dialect=dialect, quoting=quoting, **kwds
+        )
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
 
