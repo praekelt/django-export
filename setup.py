@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-export',
-    version='1.0.3',
+    version='1.0.4',
     description='Django app allowing for filtered exporting of model data.',
     long_description=open('README.rst', 'r').read() + open('AUTHORS.rst', 'r').read() + open('CHANGELOG.rst', 'r').read(),
     author='Praekelt Foundation',
