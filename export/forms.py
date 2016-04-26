@@ -36,6 +36,7 @@ class Export(forms.Form):
     )
 
     def __init__(self, model, *args, **kwargs):
+        fieldnames = kwargs.pop('fieldnames', [])
         super(Export, self).__init__(*args, **kwargs)
         self.fieldsets = (
             ('Options', {'fields': (
@@ -52,7 +53,12 @@ class Export(forms.Form):
         )
 
         field_choices = []
-        form_fields = forms.models.fields_for_model(model)
+        # "fields_for_model" excludes non-editable fields but we're just using
+        # the fields as filters, so override.
+        for field in model._meta.fields:
+            field.editable = True
+        # "fields_for_model" erroneously calls a list of fieldnames "fields".
+        form_fields = forms.models.fields_for_model(model, fields=fieldnames)
         for field in model._meta.fields:
             name = field.name
             if name not in form_fields.keys():

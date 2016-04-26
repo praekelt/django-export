@@ -1,6 +1,11 @@
 Changelog
 =========
 
+next
+----
+#. Include fields that are non-editable as potential filter fields.
+#. Make it possible for subclasses of the ``Export`` form to provide a set of filter fields.
+
 1.0.3 (2014-10-17)
 ------------------
 #. Improved celery support
