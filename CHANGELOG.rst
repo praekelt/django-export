@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.9.1
+-----
+#. Fix case where an empty list of fields is passed resulting in a blank form.
+
 1.9
 ---
 #. Include fields that are non-editable as potential filter fields.
