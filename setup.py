@@ -10,7 +10,7 @@ setup(
     url='http://github.com/praekelt/django-export',
     packages=find_packages(),
     install_requires=[
-        'django-object-tools>=1.0',
+        'django-object-tools>=1.9',
         'pyyaml>=3.11'
     ],
     tests_require=[

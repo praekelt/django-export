@@ -21,7 +21,9 @@ class FieldsTestCase(unittest.TestCase):
             getattr(models.fields, 'GenericIPAddressField', None),
             getattr(models.fields.proxy, 'OrderWrt', None),
             getattr(models.fields, 'BinaryField', None),
-            getattr(models.fields, 'FilePathField', None)
+            getattr(models.fields, 'FilePathField', None),
+            getattr(models.fields, 'DurationField', None),
+            getattr(models.fields, 'UUIDField', None)
         ]
 
         for key, value in models.__dict__.iteritems():
