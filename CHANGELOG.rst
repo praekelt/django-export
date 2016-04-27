@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.9
+---
+#. Include fields that are non-editable as potential filter fields.
+#. Make it possible for subclasses of the ``Export`` form to provide a set of filter fields.
+#. Django 1.9 compatibility.
+
 1.0.3 (2014-10-17)
 ------------------
 #. Improved celery support
