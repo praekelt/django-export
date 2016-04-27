@@ -58,7 +58,10 @@ class Export(forms.Form):
         for field in model._meta.fields:
             field.editable = True
         # "fields_for_model" erroneously calls a list of fieldnames "fields".
-        form_fields = forms.models.fields_for_model(model, fields=fieldnames)
+        if fieldnames:
+            form_fields = forms.models.fields_for_model(model, fields=fieldnames)
+        else:
+            form_fields = forms.models.fields_for_model(model)
         for field in model._meta.fields:
             name = field.name
             if name not in form_fields.keys():
