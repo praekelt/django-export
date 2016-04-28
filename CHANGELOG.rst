@@ -1,6 +1,10 @@
 Changelog
 =========
 
+next
+----
+#. Restore full set of export fields. This fixes a bug introduced in 1.9.1.
+
 1.9.1
 -----
 #. Fix case where an empty list of fields is passed resulting in a blank form.

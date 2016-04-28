@@ -57,16 +57,20 @@ class Export(forms.Form):
         # the fields as filters, so override.
         for field in model._meta.fields:
             field.editable = True
+        all_form_fields = forms.models.fields_for_model(model)
         # "fields_for_model" erroneously calls a list of fieldnames "fields".
         if fieldnames:
-            form_fields = forms.models.fields_for_model(model, fields=fieldnames)
+            filter_form_fields = forms.models.fields_for_model(model, fields=fieldnames)
         else:
-            form_fields = forms.models.fields_for_model(model)
+            filter_form_fields = all_form_fields
         for field in model._meta.fields:
             name = field.name
-            if name not in form_fields.keys():
+            if name not in all_form_fields:
                 continue
-            form_field = form_fields[name]
+            form_field = all_form_fields[name]
+            field_choices.append([name, form_field.label.capitalize()])
+            if name not in filter_form_fields.keys():
+                continue
             if form_field.__class__ in [forms.models.ModelChoiceField,
                                         forms.models.ModelMultipleChoiceField]:
                 self.fields[name] = getattr(
@@ -88,8 +92,6 @@ class Export(forms.Form):
 
             if name not in self.fieldsets[1][1]['fields']:
                 self.fieldsets[1][1]['fields'].append(name)
-
-            field_choices.append([name, form_field.label.capitalize()])
 
         self.fields['export_fields'].choices = field_choices
         self.fields['export_order_by'].choices = field_choices
