@@ -1,8 +1,8 @@
 Changelog
 =========
 
-next
-----
+1.9.2
+-----
 #. Restore full set of export fields. This fixes a bug introduced in 1.9.1.
 
 1.9.1
