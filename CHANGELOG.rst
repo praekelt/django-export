@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.11.0
+------
+#. Django 1.11 compatibility.
+#. Deprecate support for Django < 1.8.
+
 1.9.2
 -----
 #. Restore full set of export fields. This fixes a bug introduced in 1.9.1.
