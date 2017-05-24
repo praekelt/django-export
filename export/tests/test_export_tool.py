@@ -21,18 +21,15 @@ class ToolsTestCase(TestCase):
         self.obj = MockDjangoObject(field1=1, field2=2)
 
     def test_serialize(self):
+        string_types = [str]
+        if six.PY2:
+            string_types = [unicode, basestring]
         self.assertRaises(
             TypeError, self.export.serialize, args=['json', object]
         )
-        if six.PY2:
-            self.assertIn(
-                type(self.export.serialize('json', queryset=[])), [unicode, str]
-            )
-        else:
-            self.assertIn(
-                type(self.export.serialize('json', queryset=[])), [str]
-            )
-
+        self.assertIn(
+            type(self.export.serialize('json', queryset=[])), string_types
+        )
         object_list = json.loads(
             self.export.serialize('json', queryset=[self.obj])
         )

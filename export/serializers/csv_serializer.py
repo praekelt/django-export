@@ -22,7 +22,6 @@ import codecs
 import csv
 import re
 import six
-from six import string_types
 try:
     import StringIO
 except ImportError:
@@ -52,7 +51,7 @@ class Serializer(PythonSerializer):
                 item = process_m2m(item)
             elif isinstance(item, bool):
                 item = str(item).upper()
-            elif isinstance(item, string_types):
+            elif isinstance(item, six.string_types):
                 if item in ('TRUE', 'FALSE', 'NULL') or _LIST_RE.match(item):
                     # Wrap these in quotes, so as not to be confused with
                     # builtin types when deserialized

@@ -1,5 +1,4 @@
 import inspect
-import six
 
 from django.db import models
 from django.test import TestCase
@@ -21,21 +20,11 @@ class FieldsTestCase(TestCase):
             getattr(models.fields, 'UUIDField', None)
         ]
 
-        if six.PY2:
-            for key, value in models.__dict__.iteritems():
-                try:
-                    bases = inspect.getmro(value)
-                except AttributeError:
-                    continue
+        for key, value in models.__dict__.items():
+            try:
+                bases = inspect.getmro(value)
+            except AttributeError:
+                continue
 
-                if models.fields.Field in bases and value not in skip_fields:
-                    assert getattr(fields, key)
-        else:
-            for key, value in models.__dict__.items():
-                try:
-                    bases = inspect.getmro(value)
-                except AttributeError:
-                    continue
-
-                if models.fields.Field in bases and value not in skip_fields:
-                    assert getattr(fields, key)
+            if models.fields.Field in bases and value not in skip_fields:
+                assert getattr(fields, key)
