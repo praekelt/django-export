@@ -1,4 +1,5 @@
 import json
+import six
 
 from django.db import models
 from django.test import TestCase
@@ -23,9 +24,15 @@ class ToolsTestCase(TestCase):
         self.assertRaises(
             TypeError, self.export.serialize, args=['json', object]
         )
-        self.assertIn(
-            type(self.export.serialize('json', queryset=[])), [unicode, str]
-        )
+        if six.PY2:
+            self.assertIn(
+                type(self.export.serialize('json', queryset=[])), [unicode, str]
+            )
+        else:
+            self.assertIn(
+                type(self.export.serialize('json', queryset=[])), [str]
+            )
+
         object_list = json.loads(
             self.export.serialize('json', queryset=[self.obj])
         )

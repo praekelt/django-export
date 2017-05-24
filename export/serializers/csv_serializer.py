@@ -21,14 +21,22 @@ http://docs.djangoproject.com/en/1.2/topics/serialization/
 import codecs
 import csv
 import re
-import StringIO
+import six
+from six import string_types
+try:
+    import StringIO
+except ImportError:
+    import io as StringIO
 
 from itertools import groupby
 from operator import itemgetter
 
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
-from django.utils.encoding import smart_unicode
+try:
+    from django.utils.encoding import smart_unicode
+except ImportError:
+    from django.utils.encoding import smart_text as smart_unicode
 
 
 class Serializer(PythonSerializer):
@@ -44,7 +52,7 @@ class Serializer(PythonSerializer):
                 item = process_m2m(item)
             elif isinstance(item, bool):
                 item = str(item).upper()
-            elif isinstance(item, basestring):
+            elif isinstance(item, string_types):
                 if item in ('TRUE', 'FALSE', 'NULL') or _LIST_RE.match(item):
                     # Wrap these in quotes, so as not to be confused with
                     # builtin types when deserialized
@@ -73,9 +81,9 @@ class Serializer(PythonSerializer):
                 # then field values. Flat is better than nested, right? :-)
                 pk, model, fields = d['pk'], d['model'], d['fields']
                 pk, model = smart_unicode(pk), smart_unicode(model)
-                row = [pk, model] + map(process_item, fields.values())
+                row = [pk, model] + list(map(process_item, fields.values()))
                 if write_header:
-                    header = ['pk', 'model'] + fields.keys()
+                    header = ['pk', 'model'] + list(fields.keys())
                     writer.writerow(header)
                     write_header = False
                 writer.writerow(row)
@@ -223,9 +231,10 @@ class UnicodeWriter(object):
         self.writer.writerow([s.encode('utf-8') for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
-        data = data.decode('utf-8')
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
+        if six.PY2:
+            data = data.decode('utf-8')
+            # ... and reencode it into the target encoding
+            data = self.encoder.encode(data)
         # write to the target stream
         self.stream.write(data)
         # empty queue

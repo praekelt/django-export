@@ -1,4 +1,7 @@
-import StringIO
+try:
+    import StringIO
+except ImportError:
+    import io as StringIO
 import zipfile
 
 from django.core import serializers
