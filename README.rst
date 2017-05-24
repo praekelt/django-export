@@ -33,7 +33,7 @@ Usage
 
 Once installed you should see an **Export** object tool enabled on all admin change list views.
 
-.. image:: ![Export example](docs/images/export_example.png "Export example")
+.. image:: docs/images/export_example.png
 
 If you don't see the tool make sure the logged in user has the appropriate export user permission assigned (or set user as superuser).
 
