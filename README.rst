@@ -33,7 +33,7 @@ Usage
 
 Once installed you should see an **Export** object tool enabled on all admin change list views.
 
-.. image:: https://raw.githubusercontent.com/praekelt/django-export/feature/issue-9-mail-export-data/docs/images/export_example.png
+.. image:: https://github.com/praekelt/django-export/tree/develop/docs/images/export_example.png
 
 If you don't see the tool make sure the logged in user has the appropriate export user permission assigned (or set user as superuser).
 
