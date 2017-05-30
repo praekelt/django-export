@@ -47,7 +47,7 @@ def order_queryset(queryset, by, direction):
 
 def get_queryset(form, model):
     queryset = model.objects.all()
-    for name, value in form.cleaned_data.iteritems():
+    for name, value in form.cleaned_data.items():
         if name not in form.fieldsets[0][1]['fields']:
             if value:
                 queryset = form.fields[name].filter(name, value, queryset)

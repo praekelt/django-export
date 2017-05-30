@@ -151,7 +151,7 @@ def Deserializer(stream_or_string, **options):
             li = _SPLIT_RE.split(contents)
         return li
 
-    if isinstance(stream_or_string, basestring):
+    if isinstance(stream_or_string, six.string_types):
         stream = StringIO.StringIO(stream_or_string)
     else:
         stream = stream_or_string

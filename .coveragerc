@@ -1,0 +1,10 @@
+[run]
+branch = True
+source =
+    export
+omit =
+    *tests*
+    export/fields.py
+
+[report]
+show_missing = True
