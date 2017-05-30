@@ -64,14 +64,15 @@ class ExportFlowTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_superuser("super", "super@user.com", "superuser007")
-        cls.another_user = User.objects.create_user("another", "another@user.com", "another007")
+        User.objects.create_superuser("super", "super@user.com", "super007")
+        User.objects.create_user("another", "another@user.com", "another007")
 
     def setUp(self):
-        self.client.login(username="super", password="superuser007")
+        self.client.login(username="super", password="super007")
+        self.export_url = "/object-tools/auth/user/export/"
 
     def test_export_xml(self):
-        response = self.client.get("/admin/auth/user/")
+        response = self.client.get(path="/admin/auth/user/")
         self.assertEquals(response.status_code, 200)
         export_form_data_asc = {
             "export_format": "xml",
@@ -83,8 +84,16 @@ class ExportFlowTestCase(TestCase):
             "export_order_by": "username",
             "export_order_direction": "dsc"
         }
-        response_asc = self.client.post("/object-tools/auth/user/export/", data=export_form_data_asc, follow=True)
-        response_dsc = self.client.post("/object-tools/auth/user/export/", data=export_form_data_dsc, follow=True)
+        response_asc = self.client.post(
+            path=self.export_url,
+            data=export_form_data_asc,
+            follow=True
+        )
+        response_dsc = self.client.post(
+            path=self.export_url,
+            data=export_form_data_dsc,
+            follow=True
+        )
         content_type = response_asc["content-type"]
         self.assertEquals(content_type, "application/xml")
         self.assertNotEqual(response_asc, response_dsc)
@@ -95,7 +104,11 @@ class ExportFlowTestCase(TestCase):
             "export_order_by": "username",
             "export_order_direction": "asc"
         }
-        response = self.client.post("/object-tools/auth/user/export/", data=export_form_data_jsn, follow=True)
+        response = self.client.post(
+            path=self.export_url,
+            data=export_form_data_jsn,
+            follow=True
+        )
         content_type = response["content-type"]
         self.assertEquals(content_type, "application/json")
         json_content = json.loads(response.content.decode("utf-8"))
@@ -110,7 +123,11 @@ class ExportFlowTestCase(TestCase):
             "export_order_by": "username",
             "export_order_direction": "asc"
         }
-        response = self.client.post("/object-tools/auth/user/export/", data=export_form_data_csv, follow=True)
+        response = self.client.post(
+            path=self.export_url,
+            data=export_form_data_csv,
+            follow=True
+        )
         content_type = response["content-type"]
         self.assertEquals(content_type, "text/csv")
         # Check if True has been serialized to TRUE, False to FALSE and None to NULL
