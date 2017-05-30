@@ -7,3 +7,4 @@ coverage.xml
 .tox
 pep8.txt
 .coverage
+htmlcov/
