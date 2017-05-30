@@ -85,7 +85,8 @@ class ExportFlowTestCase(TestCase):
         }
         response_asc = self.client.post("/object-tools/auth/user/export/", data=export_form_data_asc, follow=True)
         response_dsc = self.client.post("/object-tools/auth/user/export/", data=export_form_data_dsc, follow=True)
-        self.assertContains(response_asc, "<?xml")
+        content_type = response_asc["content-type"]
+        self.assertEquals(content_type, "application/xml")
         self.assertNotEqual(response_asc, response_dsc)
 
     def test_export_json(self):
@@ -95,6 +96,8 @@ class ExportFlowTestCase(TestCase):
             "export_order_direction": "asc"
         }
         response = self.client.post("/object-tools/auth/user/export/", data=export_form_data_jsn, follow=True)
+        content_type = response["content-type"]
+        self.assertEquals(content_type, "application/json")
         json_content = json.loads(response.content.decode("utf-8"))
         objects = User.objects.all().count()
         self.assertEquals(type(json_content[0]), dict)
@@ -108,6 +111,9 @@ class ExportFlowTestCase(TestCase):
             "export_order_direction": "asc"
         }
         response = self.client.post("/object-tools/auth/user/export/", data=export_form_data_csv, follow=True)
-        self.assertContains(response, "auth.user")
-        # Check if True has been serialized to TRUE for 'is_superuser'
+        content_type = response["content-type"]
+        self.assertEquals(content_type, "text/csv")
+        # Check if True has been serialized to TRUE, False to FALSE and None to NULL
         self.assertContains(response, "TRUE")
+        self.assertContains(response, "FALSE")
+        self.assertContains(response, "NULL")
