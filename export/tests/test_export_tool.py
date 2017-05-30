@@ -66,10 +66,10 @@ class ExportFlowTestCase(TestCase):
     def setUpTestData(cls):
         User.objects.create_superuser("super", "super@user.com", "super007")
         User.objects.create_user("another", "another@user.com", "another007")
+        cls.export_url = "/object-tools/auth/user/export/"
 
     def setUp(self):
         self.client.login(username="super", password="super007")
-        self.export_url = "/object-tools/auth/user/export/"
 
     def test_export_xml(self):
         response = self.client.get(path="/admin/auth/user/")
@@ -112,7 +112,7 @@ class ExportFlowTestCase(TestCase):
         content_type = response["content-type"]
         self.assertEquals(content_type, "application/json")
         json_content = json.loads(response.content.decode("utf-8"))
-        objects = User.objects.all().count()
+        objects = User.objects.count()
         self.assertEquals(type(json_content[0]), dict)
         self.assertEquals(json_content[0]["model"], "auth.user")
         self.assertEquals(objects, len(json_content))

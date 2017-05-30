@@ -33,9 +33,9 @@ from operator import itemgetter
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
 try:
-    from django.utils.encoding import smart_unicode
+    from django.utils.encoding import smart_unicode as smart_text
 except ImportError:
-    from django.utils.encoding import smart_text as smart_unicode
+    from django.utils.encoding import smart_text
 
 
 class Serializer(PythonSerializer):
@@ -58,7 +58,7 @@ class Serializer(PythonSerializer):
                     item = "'%s'" % item
             elif item is None:
                 item = 'NULL'
-            return smart_unicode(item)
+            return smart_text(item)
 
         def process_m2m(seq):
             parts = []
@@ -79,7 +79,7 @@ class Serializer(PythonSerializer):
                 # "flatten" the object. PK and model values come first,
                 # then field values. Flat is better than nested, right? :-)
                 pk, model, fields = d['pk'], d['model'], d['fields']
-                pk, model = smart_unicode(pk), smart_unicode(model)
+                pk, model = smart_text(pk), smart_text(model)
                 row = [pk, model] + list(map(process_item, fields.values()))
                 if write_header:
                     header = ['pk', 'model'] + list(fields.keys())
