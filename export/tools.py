@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
 import object_tools
@@ -94,12 +94,11 @@ class Export(object_tools.ObjectTool):
 
         context = {'adminform': adminform}
         context.update(extra_context or {})
-        context_instance = template.RequestContext(request)
 
-        return render_to_response(
+        return render(
+            request,
             'export/export_form.html',
             context,
-            context_instance=context_instance
         )
 
 object_tools.tools.register(Export)

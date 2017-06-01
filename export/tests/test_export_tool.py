@@ -74,6 +74,8 @@ class ExportFlowTestCase(TestCase):
     def test_export_xml(self):
         response = self.client.get(path="/admin/auth/user/")
         self.assertEquals(response.status_code, 200)
+        response = self.client.get(self.export_url)
+        self.assertEquals(response.status_code, 200)
         export_form_data_asc = {
             "export_format": "xml",
             "export_order_by": "username",
