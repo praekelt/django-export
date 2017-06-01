@@ -61,6 +61,9 @@ class ToolsTestCase(TestCase):
 
 
 class ExportFlowTestCase(TestCase):
+    """
+    Testcase for the export tool workflow on the Django User Model
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -120,6 +123,13 @@ class ExportFlowTestCase(TestCase):
         self.assertEquals(objects, len(json_content))
 
     def test_export_csv(self):
+        User.objects.create_user(
+            username="FALSE",
+            email="someuser@user.com",
+            password="another007",
+            first_name="[test user]",
+            last_name="NULL"
+        )
         export_form_data_csv = {
             "export_format": "csv",
             "export_order_by": "username",
@@ -132,7 +142,10 @@ class ExportFlowTestCase(TestCase):
         )
         content_type = response["content-type"]
         self.assertEquals(content_type, "text/csv")
-        # Check if True has been serialized to TRUE, False to FALSE and None to NULL
+        # Check csv serialization rules as defined in csv_serializer.py
         self.assertContains(response, "TRUE")
         self.assertContains(response, "FALSE")
         self.assertContains(response, "NULL")
+        self.assertContains(response, "'[test user]'")
+        self.assertContains(response, "'FALSE'")
+        self.assertContains(response, "'NULL'")
