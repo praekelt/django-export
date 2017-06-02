@@ -21,7 +21,6 @@ http://docs.djangoproject.com/en/1.2/topics/serialization/
 import codecs
 import csv
 import re
-import six
 try:
     import StringIO
 except ImportError:
@@ -32,6 +31,7 @@ from operator import itemgetter
 
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
+from django.utils import six
 try:
     from django.utils.encoding import smart_unicode as smart_text
 except ImportError:

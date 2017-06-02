@@ -1,9 +1,9 @@
 import json
-import six
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.test import TestCase
+from django.utils import six
 
 from export import tools
 
