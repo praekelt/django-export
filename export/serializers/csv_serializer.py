@@ -22,9 +22,9 @@ import codecs
 import csv
 import re
 try:
-    import StringIO
+    from StringIO import StringIO
 except ImportError:
-    import io as StringIO
+    from io import StringIO
 
 from itertools import groupby
 from operator import itemgetter
@@ -32,10 +32,7 @@ from operator import itemgetter
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.utils import six
-try:
-    from django.utils.encoding import smart_unicode as smart_text
-except ImportError:
-    from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text
 
 
 class Serializer(PythonSerializer):
@@ -152,7 +149,7 @@ def Deserializer(stream_or_string, **options):
         return li
 
     if isinstance(stream_or_string, six.string_types):
-        stream = StringIO.StringIO(stream_or_string)
+        stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string
 
@@ -219,7 +216,7 @@ class UnicodeWriter(object):
     def __init__(self, f, dialect=csv.excel, encoding='utf-8',
                  quoting=csv.QUOTE_ALL, **kwds):
         # Redirect output to a queue
-        self.queue = StringIO.StringIO()
+        self.queue = StringIO()
         self.writer = csv.writer(
             self.queue, dialect=dialect, quoting=quoting, **kwds
         )
@@ -227,17 +224,22 @@ class UnicodeWriter(object):
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        self.writer.writerow([s.encode('utf-8') for s in row])
+        if six.PY2:
+            self.writer.writerow([s.encode('utf-8') for s in row])
+        elif six.PY3:
+            self.writer.writerow(row)
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         if six.PY2:
             data = data.decode('utf-8')
             # ... and reencode it into the target encoding
             data = self.encoder.encode(data)
+
         # write to the target stream
         self.stream.write(data)
-        # empty queue
+        # empty queue and reset position
         self.queue.truncate(0)
+        self.queue.seek(0)
 
     def writerows(self, rows):
         for row in rows:

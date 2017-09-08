@@ -1,7 +1,7 @@
 try:
-    import StringIO
+    from StringIO import StringIO
 except ImportError:
-    import io as StringIO
+    from io import StringIO
 import zipfile
 
 from django.core import serializers
@@ -13,7 +13,7 @@ def mail_export(email, filename, serializer_kwargs, query_kwargs):
     queryset = get_queryset(**query_kwargs)
     data = serialize(queryset=queryset, **serializer_kwargs)
 
-    zip_data = StringIO.StringIO()
+    zip_data = StringIO()
     zip_file = zipfile.ZipFile(
         zip_data, mode='w', compression=zipfile.ZIP_DEFLATED
     )

@@ -141,11 +141,13 @@ class ExportFlowTestCase(TestCase):
             follow=True
         )
         content_type = response["content-type"]
+        csv_header = '"pk","model","password","last_login","is_superuser","username","first_name","last_name","email","is_staff","is_active","date_joined","groups","user_permissions"'
+        test_user = '"NULL","FALSE","\'FALSE\'","\'[test user]\'","\'NULL\'","someuser@user.com","FALSE","TRUE"'
+        another_user = '"NULL","FALSE","another","","","another@user.com","FALSE","TRUE"'
         self.assertEquals(content_type, "text/csv")
-        # Check csv serialization rules as defined in csv_serializer.py
-        self.assertContains(response, "TRUE")
-        self.assertContains(response, "FALSE")
-        self.assertContains(response, "NULL")
-        self.assertContains(response, "'[test user]'")
-        self.assertContains(response, "'FALSE'")
-        self.assertContains(response, "'NULL'")
+        self.assertContains(response, csv_header)
+        # Check csv serialization rules from csv_serializer.py using
+        # the is_superuser, username, first_name, last_name, email,
+        # is_staff, is_active columns
+        self.assertContains(response, test_user)
+        self.assertContains(response, another_user)
