@@ -1,18 +1,20 @@
 language: python
-python:
-  - "2.7"
-  - "3.6"
+matrix:
+  include:
+    - python: 2.7
+      env:
+        - TOXENV=django19-py27
+        - TOXENV=django110-py27
+        - TOXENV=django111-py27
+    - python: 3.6
+      env:
+       - TOXENV=django19-py36
+       - TOXENV=django110-py36
+       - TOXENV=django111-py36
 install:
   - pip install tox
   - pip install coveralls
 script:
   - tox
-env:
-  - TOXENV=django19-py27
-  - TOXENV=django19-py36
-  - TOXENV=django110-py27
-  - TOXENV=django110-py36
-  - TOXENV=django111-py27
-  - TOXENV=django111-py36
 after_success:
   - coveralls
