@@ -21,14 +21,18 @@ http://docs.djangoproject.com/en/1.2/topics/serialization/
 import codecs
 import csv
 import re
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from itertools import groupby
 from operator import itemgetter
 
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
-from django.utils.encoding import smart_unicode
+from django.utils import six
+from django.utils.encoding import smart_text
 
 
 class Serializer(PythonSerializer):
@@ -44,14 +48,14 @@ class Serializer(PythonSerializer):
                 item = process_m2m(item)
             elif isinstance(item, bool):
                 item = str(item).upper()
-            elif isinstance(item, basestring):
+            elif isinstance(item, six.string_types):
                 if item in ('TRUE', 'FALSE', 'NULL') or _LIST_RE.match(item):
                     # Wrap these in quotes, so as not to be confused with
                     # builtin types when deserialized
                     item = "'%s'" % item
             elif item is None:
                 item = 'NULL'
-            return smart_unicode(item)
+            return smart_text(item)
 
         def process_m2m(seq):
             parts = []
@@ -72,10 +76,10 @@ class Serializer(PythonSerializer):
                 # "flatten" the object. PK and model values come first,
                 # then field values. Flat is better than nested, right? :-)
                 pk, model, fields = d['pk'], d['model'], d['fields']
-                pk, model = smart_unicode(pk), smart_unicode(model)
-                row = [pk, model] + map(process_item, fields.values())
+                pk, model = smart_text(pk), smart_text(model)
+                row = [pk, model] + list(map(process_item, fields.values()))
                 if write_header:
-                    header = ['pk', 'model'] + fields.keys()
+                    header = ['pk', 'model'] + list(fields.keys())
                     writer.writerow(header)
                     write_header = False
                 writer.writerow(row)
@@ -144,8 +148,8 @@ def Deserializer(stream_or_string, **options):
             li = _SPLIT_RE.split(contents)
         return li
 
-    if isinstance(stream_or_string, basestring):
-        stream = StringIO.StringIO(stream_or_string)
+    if isinstance(stream_or_string, six.string_types):
+        stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string
 
@@ -212,7 +216,7 @@ class UnicodeWriter(object):
     def __init__(self, f, dialect=csv.excel, encoding='utf-8',
                  quoting=csv.QUOTE_ALL, **kwds):
         # Redirect output to a queue
-        self.queue = StringIO.StringIO()
+        self.queue = StringIO()
         self.writer = csv.writer(
             self.queue, dialect=dialect, quoting=quoting, **kwds
         )
@@ -220,16 +224,22 @@ class UnicodeWriter(object):
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        self.writer.writerow([s.encode('utf-8') for s in row])
+        if six.PY2:
+            self.writer.writerow([s.encode('utf-8') for s in row])
+        elif six.PY3:
+            self.writer.writerow(row)
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
-        data = data.decode('utf-8')
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
+        if six.PY2:
+            data = data.decode('utf-8')
+            # ... and reencode it into the target encoding
+            data = self.encoder.encode(data)
+
         # write to the target stream
         self.stream.write(data)
-        # empty queue
+        # empty queue and reset position
         self.queue.truncate(0)
+        self.queue.seek(0)
 
     def writerows(self, rows):
         for row in rows:

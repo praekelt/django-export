@@ -20,7 +20,7 @@ class FieldsTestCase(TestCase):
             getattr(models.fields, 'UUIDField', None)
         ]
 
-        for key, value in models.__dict__.iteritems():
+        for key, value in models.__dict__.items():
             try:
                 bases = inspect.getmro(value)
             except AttributeError:

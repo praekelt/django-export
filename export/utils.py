@@ -1,4 +1,7 @@
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import zipfile
 
 from django.core import serializers
@@ -10,7 +13,7 @@ def mail_export(email, filename, serializer_kwargs, query_kwargs):
     queryset = get_queryset(**query_kwargs)
     data = serialize(queryset=queryset, **serializer_kwargs)
 
-    zip_data = StringIO.StringIO()
+    zip_data = StringIO()
     zip_file = zipfile.ZipFile(
         zip_data, mode='w', compression=zipfile.ZIP_DEFLATED
     )
@@ -44,7 +47,7 @@ def order_queryset(queryset, by, direction):
 
 def get_queryset(form, model):
     queryset = model.objects.all()
-    for name, value in form.cleaned_data.iteritems():
+    for name, value in form.cleaned_data.items():
         if name not in form.fieldsets[0][1]['fields']:
             if value:
                 queryset = form.fields[name].filter(name, value, queryset)
