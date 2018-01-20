@@ -22,7 +22,9 @@ Installation
 
 #. Add ``export`` to your ``INSTALLED_APPS`` setting.
 
-#. Optionally for exporting in CSV you need to add ``export.serializers.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.::
+#. Optionally for exporting in CSV you need to add ``export.serializers.csv_serializer`` to your ``SERIALIZATION_MODULES`` setting, i.e.:
+
+   .. code-block:: python
 
     SERIALIZATION_MODULES = {
         'csv': 'export.serializers.csv_serializer'
