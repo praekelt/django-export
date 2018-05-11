@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-export',
-    version='1.9.2',
+    version='1.11.0',
     description='Django app allowing for filtered exporting of model data.',
     long_description=open('README.rst', 'r').read() + open('AUTHORS.rst', 'r').read() + open('CHANGELOG.rst', 'r').read(),
     author='Praekelt Consulting',
@@ -10,7 +10,7 @@ setup(
     url='http://github.com/praekelt/django-export',
     packages=find_packages(),
     install_requires=[
-        'django-object-tools>=1.9',
+        'django-object-tools',
         'pyyaml>=3.11'
     ],
     tests_require=[

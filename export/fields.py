@@ -429,6 +429,10 @@ class AutoField(IntegerField):
     pass
 
 
+class BigAutoField(IntegerField):
+    pass
+
+
 class BigIntegerField(IntegerField):
     pass
 
