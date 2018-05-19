@@ -17,7 +17,6 @@ class FieldsTestCase(TestCase):
             getattr(models.fields, 'BinaryField', None),
             getattr(models.fields, 'FilePathField', None),
             getattr(models.fields, 'DurationField', None),
-            getattr(models.fields, 'UUIDField', None)
         ]
 
         for key, value in models.__dict__.items():
