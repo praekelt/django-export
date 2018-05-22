@@ -575,5 +575,20 @@ class URLField(BasicTextField):
     pass
 
 
+class UUIDField(forms.fields.UUIDField):
+    def __init__(self, field, *args, **kwargs):
+        super(UUIDField, self).__init__(
+            required=False,
+            help_text="Only objects with the exact '%s' \
+                      will be exported. Case is ignored and '-' are optional." % (
+            field.label.lower()),
+            *args, **kwargs
+        )
+
+    def filter(self, name, value, queryset):
+        kwargs = {name: value}
+        return queryset.filter(**kwargs)
+
+
 class XMLField(BasicTextField):
     pass
