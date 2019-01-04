@@ -11,6 +11,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     tests_require=[
+        'django-object-tools>=2.0',
         'tox'
     ],
     test_suite="tox",
