@@ -10,6 +10,9 @@ setup(
     url='http://github.com/praekelt/django-export',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=[
+        'django-object-tools>=2.0'
+    ],
     tests_require=[
         'django-object-tools>=2.0',
         'tox'
