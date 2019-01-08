@@ -1,26 +1,32 @@
-sudo: false
-
-dist: xenial
-
 language: python
-
-python:
-  - "3.5"
-  - "3.6"
-  - "3.7"
-
-env:
-  - DJANGO="Django>=1.11,<2.0"
-  - DJANGO="Django>=2.0,<2.1"
-  - DJANGO="Django>=2.1,<2.2"
-
-
+matrix:
+  include:
+    - python: "2.7"
+      env:
+        - TOXENV=django111-py27
+        - TOXENV=django20-py27
+        - TOXENV=django21-py27
+    - python: "3.5"
+      env:
+       - TOXENV=django111-py35
+       - TOXENV=django20-py35
+       - TOXENV=django21-py35
+    - python: "3.6"
+      env:
+       - TOXENV=django111-py36
+       - TOXENV=django20-py36
+       - TOXENV=django21-py36
+    - python: "3.7"
+      sudo: required
+      dist: xenial
+      env:
+       - TOXENV=django111-py37
+       - TOXENV=django20-py37
+       - TOXENV=django21-py37
+cache: pip
 install:
   - pip install tox
   - pip install coveralls
-
 script:
   - tox
-
-after_success:
   - coveralls
